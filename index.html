@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$t.me — every movement has a route</title>
+<meta name="description" content="$t.me is the tokenized route layer of Telegram culture on TON. The prefix before every movement.">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;500;600&family=IBM+Plex+Mono:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #050505;
+  --panel: #09090b;
+  --text: #f4f4f5;
+  --sec: #6b7280;
+  --muted: #52525b;
+  --dim: #3f3f46;
+  --border: #1f2937;
+  --border-s: #161b22;
+  --teal: #14b8a6;
+  --mono: 'IBM Plex Mono', 'Geist Mono', 'JetBrains Mono', 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --hero-font: 'Oxanium', 'Sora', 'Space Grotesk', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ── NAV ── */
+
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 4vw, 48px);
+  height: 48px;
+  border-bottom: 1px solid var(--border-s);
+  background: rgba(5, 5, 5, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.nav-route {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav-route:hover { color: var(--sec); }
+
+.nav-index {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  font-family: var(--mono);
+}
+
+.nav-index:hover { color: var(--text); }
+
+/* ── VIEWS ── */
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── HOME BG ── */
+
+.home-bg {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(28vh, 24vw);
+  height: min(28vh, 24vw);
+  opacity: 0.022;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HERO ── */
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px clamp(16px, 4vw, 48px) 0;
+}
+
+.hero-line {
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1;
+}
+
+.hero-prefix {
+  font-family: var(--hero-font);
+  font-size: clamp(36px, 8.5vw, 104px);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  color: var(--muted);
+}
+
+.hero-word {
+  display: flex;
+  font-family: var(--hero-font);
+  font-size: clamp(36px, 8.5vw, 104px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  color: var(--text);
+}
+
+.fc {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.08em;
+}
+
+.fi {
+  display: block;
+  height: 1.08em;
+  line-height: 1.08;
+  text-align: center;
+  min-width: 0.55em;
+}
+
+.hero-slogan {
+  margin-top: clamp(20px, 3vh, 36px);
+  font-size: clamp(14px, 1.3vw, 16px);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  color: var(--sec);
+  text-align: center;
+}
+
+.hero-sub {
+  margin-top: clamp(8px, 1.2vh, 12px);
+  font-size: clamp(11px, 1vw, 13px);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.35;
+}
+
+/* ── BUTTONS ── */
+
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: clamp(28px, 4vh, 44px);
+  padding: 0 16px;
+}
+
+.btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 11px 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  min-width: 140px;
+  text-decoration: none;
+}
+
+.btn:hover {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn:hover .btn-label { color: var(--text); }
+
+.btn-route {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 5px;
+  font-family: var(--mono);
+}
+
+.btn-label {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  text-transform: uppercase;
+  font-family: var(--mono);
+  transition: color 0.2s;
+}
+
+/* ── CA ── */
+
+.ca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: clamp(20px, 3vh, 32px);
+  padding: 8px 16px;
+  border: 1px solid var(--border-s);
+  cursor: pointer;
+  transition: border-color 0.2s;
+  user-select: none;
+}
+
+.ca:hover { border-color: var(--border); }
+
+.ca-tag {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.ca-addr {
+  font-size: clamp(10px, 1vw, 12px);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--sec);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ca-btn {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.ca:hover .ca-btn { color: var(--sec); }
+
+/* ── FOOTER ── */
+
+.footer {
+  padding: clamp(32px, 5vh, 48px) clamp(20px, 4vw, 48px);
+  text-align: center;
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: #27272a;
+  border-top: 1px solid var(--border-s);
+}
+
+/* ── INDEX PAGE ── */
+
+.idx-wrap {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.idx-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(75vh, 75vw);
+  height: min(75vh, 75vw);
+  opacity: 0.022;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.idx {
+  position: relative;
+  z-index: 1;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(80px, 12vh, 120px) clamp(24px, 5vw, 72px) clamp(48px, 6vh, 72px);
+}
+
+.idx-hero {
+  font-family: var(--hero-font);
+  font-size: clamp(30px, 4.5vw, 52px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+.idx-subtitle {
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: clamp(32px, 4vh, 48px);
+}
+
+.idx-intro {
+  font-size: clamp(15px, 1.5vw, 18px);
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--text);
+  margin-bottom: clamp(24px, 3vh, 36px);
+  letter-spacing: 0.01em;
+}
+
+.idx-sep {
+  height: 1px;
+  background: linear-gradient(90deg, var(--border) 0%, var(--border-s) 100%);
+}
+
+.idx-section {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 0 clamp(32px, 5vw, 56px);
+  padding: clamp(32px, 4vh, 48px) 0;
+  align-items: start;
+}
+
+.idx-label {
+  font-size: clamp(16px, 1.6vw, 20px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding-top: 3px;
+}
+
+.idx-body {
+  font-size: clamp(15px, 1.4vw, 17px);
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--sec);
+  letter-spacing: 0.015em;
+}
+
+.idx-close-section {
+  padding: clamp(32px, 4vh, 48px) 0;
+}
+
+.idx-close {
+  font-family: var(--hero-font);
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--sec);
+}
+
+/* ── LABEL FLIP ── */
+
+.idx-flip {
+  transition: color 0.3s;
+  color: var(--muted);
+}
+
+.idx-flip.flipping { color: var(--dim); }
+.idx-flip.landed { color: var(--teal); }
+
+/* ── INDEX LINKS ── */
+
+.idx-links {
+  margin-top: clamp(24px, 3vh, 36px);
+  padding-top: clamp(28px, 3.5vh, 40px);
+  border-top: 1px solid var(--border-s);
+}
+
+.idx-links-title {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--dim);
+  text-transform: uppercase;
+  margin-bottom: clamp(14px, 2vh, 24px);
+}
+
+.idx-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.idx-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 11px 20px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.2s, background 0.2s;
+  min-width: 120px;
+  flex: 1;
+  max-width: 180px;
+}
+
+.idx-link:hover { border-color: var(--border); background: rgba(255, 255, 255, 0.05); }
+.idx-link:hover .idx-link-label { color: var(--text); }
+
+.idx-link-route {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.idx-link-label {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+/* ── MOBILE ── */
+
+@media (max-width: 600px) {
+  .btns {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .btn { min-width: unset; }
+  .ca-addr { max-width: 130px; }
+  .idx-section { grid-template-columns: 1fr; gap: 10px; }
+  .idx-link-row { flex-direction: column; }
+  .idx-link { max-width: unset; }
+}
+
+@media (max-width: 380px) {
+  .ca-addr { max-width: 90px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-route" id="navHome">t.me/tmeonton</span>
+  <button class="nav-index" id="navIdx">INDEX</button>
+</nav>
+
+<!-- ── HOME ── -->
+<div class="view active" id="viewHome">
+  <svg class="home-bg" viewBox="0 0 240 240" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="120" cy="120" r="120" opacity="0.4"/>
+    <path d="M100.04 144.41l48.36 35.73c5.52 3.04 9.5 1.47 10.88-5.12l19.68-92.77c2.02-8.08-3.08-11.74-8.36-9.35L55.01 117.48c-7.89 3.16-7.84 7.57-1.44 9.53l29.66 9.26 68.67-43.33c3.24-1.97 6.22-.91 3.78 1.26"/>
+    <path d="M98 175c-3.89 0-3.23-1.47-4.57-5.17L82 134.8l18.04 9.61z" opacity="0.65"/>
+    <path d="M98 175c3 0 4.33-1.37 6-3l16-15.56-19.96-12.04z" opacity="0.75"/>
+  </svg>
+  <section class="hero">
+    <div class="hero-line">
+      <span class="hero-prefix">t.me/</span>
+      <div class="hero-word" id="heroWord"></div>
+    </div>
+    <div class="hero-slogan">every movement has a route.</div>
+    <div class="hero-sub">
+      the native doorway of telegram culture on ton.<br>
+      it is... <span style="color:#0f8a7e">everything.</span>
+    </div>
+    <div class="btns">
+      <a class="btn" href="https://fragment.com" target="_blank" rel="noopener">
+        <span class="btn-route">fragment.com</span>
+        <span class="btn-label">fragment</span>
+      </a>
+      <a class="btn" href="https://t.me/usernameshop" target="_blank" rel="noopener">
+        <span class="btn-route">t.me/usernameshop</span>
+        <span class="btn-label">username shop</span>
+      </a>
+      <a class="btn" href="https://t.me/mrkt" target="_blank" rel="noopener">
+        <span class="btn-route">t.me/mrkt</span>
+        <span class="btn-label">gift shop</span>
+      </a>
+      <a class="btn" href="#" onclick="return false;">
+        <span class="btn-route">coming soon</span>
+        <span class="btn-label">dex</span>
+      </a>
+      <a class="btn" href="https://t.me/tmeonton" target="_blank" rel="noopener">
+        <span class="btn-route">t.me/tmeonton</span>
+        <span class="btn-label">community</span>
+      </a>
+    </div>
+    <div class="ca" id="caBar" role="button" tabindex="0" aria-label="Copy contract address">
+      <span class="ca-tag">CA</span>
+      <span class="ca-addr" id="caDisplay"></span>
+      <span class="ca-btn" id="caCopy">copy</span>
+    </div>
+  </section>
+  <footer class="footer">unofficial community artifact. not affiliated with telegram.</footer>
+</div>
+
+<!-- ── INDEX ── -->
+<div class="view" id="viewIndex">
+  <div class="idx-wrap">
+    <!-- TELEGRAM LOGO BG -->
+    <svg class="idx-bg" viewBox="0 0 240 240" fill="white" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="120" cy="120" r="120" opacity="0.4"/>
+      <path d="M100.04 144.41l48.36 35.73c5.52 3.04 9.5 1.47 10.88-5.12l19.68-92.77c2.02-8.08-3.08-11.74-8.36-9.35L55.01 117.48c-7.89 3.16-7.84 7.57-1.44 9.53l29.66 9.26 68.67-43.33c3.24-1.97 6.22-.91 3.78 1.26"/>
+      <path d="M98 175c-3.89 0-3.23-1.47-4.57-5.17L82 134.8l18.04 9.61z" opacity="0.65"/>
+      <path d="M98 175c3 0 4.33-1.37 6-3l16-15.56-19.96-12.04z" opacity="0.75"/>
+    </svg>
+
+    <section class="idx">
+
+      <div class="idx-hero">every movement has a route.</div>
+      <div class="idx-subtitle">the route layer of telegram culture</div>
+
+      <div class="idx-sep"></div>
+
+      <div class="idx-intro">t.me is the native doorway of Telegram. With over 950 million monthly active users, Telegram is one of the largest messaging platforms on Earth. Every handle, bot, channel, group, mini app, gift, and movement eventually becomes a route. $t.me is the tokenized myth of that route. Not one channel. Not one dog. Not one app. The prefix before every movement. It is... <span style="color:#0f8a7e">everything.</span></div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="users">users</span></div>
+        <div class="idx-body">Every Telegram account can claim a unique @username, turning it into a public address accessible at t.me/username. Before the blockchain, before wallets or mini apps, the handle was the first digital identity people owned on Telegram. In late 2022, Telegram integrated with TON to make usernames tradeable assets through the Fragment marketplace. Premium handles have sold for over a million dollars. A username is no longer just a name. It is a scarce, ownable, publicly routable address on a network approaching one billion people.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="bots">bots</span></div>
+        <div class="idx-body">Telegram launched its Bot API in 2015, turning every chat into a programmable interface. Bots can process payments, answer inline queries, moderate groups with hundreds of thousands of members, run games, and connect to external APIs. There are millions of active bots on the platform. They handle everything from crypto price alerts and wallet interactions to customer support and automated trading. With the introduction of Web App support, bots became the gateway to Telegram's mini app ecosystem, allowing developers to embed full interactive applications inside any chat.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="channels">channels</span></div>
+        <div class="idx-body">Telegram channels are one-to-many broadcast tools with no upper limit on subscribers. Some channels reach millions of followers. They function as public news feeds, market signal streams, political broadcast networks, and community bulletin boards. Channels support reactions, comments via linked discussion groups, view counts, and scheduled posts. In many countries, Telegram channels have become primary news infrastructure, often outpacing traditional media. They are used by governments, protest movements, financial analysts, and crypto communities alike. A channel is a public route. The t.me/ link is how people find it.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="groups">groups</span></div>
+        <div class="idx-body">Telegram groups support up to 200,000 members in a single chat. They include admin hierarchies, granular permissions, anti-spam tools, slow mode, forum-style topics, and pinned messages. Groups are where Telegram communities actually operate. Trading alpha gets shared, DAOs coordinate, meme coins get raided, and movements get organized. Forum topics, introduced in 2022, allow large groups to run structured conversations across multiple threads within a single group. Every public group has a t.me/ link. Every private group can generate invite links through the same route.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="miniapps">miniapps</span></div>
+        <div class="idx-body">Telegram Mini Apps (originally Telegram Web Apps) launched in 2022 and expanded rapidly through 2023 and 2024. They allow developers to build full web applications that run inside Telegram with native access to user identity, payments, and the TON blockchain. Mini apps like Notcoin, Hamster Kombat, and Catizen onboarded tens of millions of users into crypto through Telegram alone. Developers can launch mini apps through bots or attach them to direct links. The t.me/ route became executable. A link is no longer just a destination. It is an application, a game, a wallet, a marketplace.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="fragment">fragment</span></div>
+        <div class="idx-body">Fragment is Telegram's official auction and marketplace platform, launched in October 2022 and built on the TON blockchain. It allows users to buy and sell Telegram usernames, collectible phone numbers, and anonymous numbers using Toncoin. Fragment established that Telegram identity has monetary value. Premium four- and five-letter usernames have traded for significant sums. Anonymous numbers let users create Telegram accounts without revealing a personal phone number. Fragment turned the address layer of Telegram, the @username, the route, into a provably scarce, blockchain-verified digital asset.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="memes">memes</span></div>
+        <div class="idx-body">Telegram has one of the most active sticker and meme ecosystems of any platform. Custom sticker packs, animated stickers, custom emoji, and GIF search are built into every chat. Meme culture on Telegram travels through channels, gets amplified in groups, and spreads via sticker packs that anyone can create and share with a single t.me/ link. In the crypto space, Telegram is where meme coins launch, communities form, raids get coordinated, and narratives take shape before they ever reach Twitter or the charts. The culture moves through Telegram routes first.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-section">
+        <div class="idx-label">t.me/<span class="idx-flip" data-flip="route">route</span></div>
+        <div class="idx-body">Every username, every bot, every channel, every group, every mini app, every sticker pack, and every invite on Telegram resolves to the same prefix: t.me/. It is the universal addressing scheme for nearly a billion users. TON made that address layer ownable. Fragment made it scarce. Mini apps made it executable. $t.me is the tokenized myth of the route itself. Not one channel. Not one dog. Not one app. The prefix before every movement. The doorway before the channel. The path before the network.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+      <div class="idx-close-section">
+        <div class="idx-close">every movement has a <span style="color:#14b8a6">route</span>.</div>
+      </div>
+
+      <div class="idx-sep"></div>
+
+      <!-- INDEX LINKS -->
+      <div class="idx-links">
+        <div class="idx-links-title">routes</div>
+        <div class="idx-link-row">
+          <a class="idx-link" href="https://fragment.com" target="_blank" rel="noopener">
+            <span class="idx-link-route">fragment.com</span>
+            <span class="idx-link-label">fragment</span>
+          </a>
+          <a class="idx-link" href="https://t.me/usernameshop" target="_blank" rel="noopener">
+            <span class="idx-link-route">t.me/usernameshop</span>
+            <span class="idx-link-label">username shop</span>
+          </a>
+          <a class="idx-link" href="https://t.me/mrkt" target="_blank" rel="noopener">
+            <span class="idx-link-route">t.me/mrkt</span>
+            <span class="idx-link-label">gift shop</span>
+          </a>
+          <a class="idx-link" href="#" onclick="return false;">
+            <span class="idx-link-route">coming soon</span>
+            <span class="idx-link-label">dex</span>
+          </a>
+          <a class="idx-link" href="https://t.me/tmeonton" target="_blank" rel="noopener">
+            <span class="idx-link-route">t.me/tmeonton</span>
+            <span class="idx-link-label">community</span>
+          </a>
+          <a class="idx-link" href="https://t.me/PostAlerts" target="_blank" rel="noopener">
+            <span class="idx-link-route">t.me/PostAlerts</span>
+            <span class="idx-link-label">channel</span>
+          </a>
+        </div>
+      </div>
+
+    </section>
+  </div>
+  <footer class="footer">unofficial community artifact. not affiliated with telegram.</footer>
+</div>
+
+<script>
+(function () {
+
+  /* ── WORD SYSTEM ── */
+
+  var CORE = [
+    'ROUTE','SIGNAL','HANDLE','CHANNEL','BOT','GROUP','APP',
+    'CHAIN','FRAGMENT','WALLET','SLASH','PREFIX','ADDRESS',
+    'ORIGIN','MOVEMENT'
+  ];
+  var SECONDARY = [
+    'POST','CULT','ARMY','MEME','CHAT','LINK','NAME','ALIAS',
+    'THREAD','FEED','PORTAL','CLAIM','OWNER','ADMIN','PIN','PACK',
+    'GIFT','AUCTION','TON','JETTON','RAID','DROP','MINT','TICKER',
+    'ALPHA','LORE','RUMOR','LEAK','ARCHIVE','MIRROR','ECHO','TRACE',
+    'PING','RELAY','KEY','ACCESS','INVITE','START','ENTER','VERIFY',
+    'PROOF','PROFILE','AVATAR','STATUS','ALERT','COMMAND','PATH',
+    'ROOT','GENESIS','NATION','TRIBE','CLAN','CREW','SQUAD',
+    'LEGION','HIVE'
+  ];
+
+  var CORE_SET = {};
+  CORE.forEach(function (w) { CORE_SET[w] = true; });
+
+  var AZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var FLIP_MS = 38;
+  var STAGGER = 100;
+  var HOLD = 2400;
+  var TEAL = '#14b8a6';
+  var WHITE = '#f4f4f5';
+  var CD_MIN = 4;
+  var CD_MAX = 6;
+
+  var heroWord = document.getElementById('heroWord');
+  var chars = [];
+  var lastWord = '';
+  var coreQ = [];
+  var secQ = [];
+  var cooldown = 0;
+  var sinceCore = 0;
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function draw(q, pool) {
+    if (!q.length) { var s = shuffle(pool); for (var i = 0; i < s.length; i++) q.push(s[i]); }
+    return q.shift();
+  }
+
+  function next() {
+    var w, n = 0;
+    if (cooldown > 0) {
+      do { w = draw(secQ, SECONDARY); n++; } while (w === lastWord && n < 12);
+      cooldown--;
+      sinceCore++;
+    } else {
+      var useCore = Math.random() < 0.65;
+      if (sinceCore >= CD_MAX + 2) useCore = true;
+      do {
+        w = useCore ? draw(coreQ, CORE) : draw(secQ, SECONDARY);
+        n++;
+      } while (w === lastWord && n < 12);
+      if (CORE_SET[w]) {
+        cooldown = CD_MIN + Math.floor(Math.random() * (CD_MAX - CD_MIN + 1));
+        sinceCore = 0;
+      } else {
+        sinceCore++;
+      }
+    }
+    lastWord = w;
+    return w;
+  }
+
+  function build(len) {
+    heroWord.innerHTML = '';
+    chars = [];
+    for (var i = 0; i < len; i++) {
+      var el = document.createElement('span');
+      el.className = 'fc';
+      var inner = document.createElement('span');
+      inner.className = 'fi';
+      inner.textContent = AZ[Math.floor(Math.random() * 26)];
+      el.appendChild(inner);
+      heroWord.appendChild(el);
+      chars.push({ el: el, inner: inner, t: null });
+    }
+  }
+
+  function flip(c, target, color, done) {
+    var steps = 5 + Math.floor(Math.random() * 5);
+    var n = 0;
+    c.inner.style.color = '';
+    clearInterval(c.t);
+    c.t = setInterval(function () {
+      if (n < steps) {
+        c.inner.textContent = AZ[Math.floor(Math.random() * 26)];
+        n++;
+      } else {
+        clearInterval(c.t);
+        c.inner.textContent = target;
+        c.inner.style.color = color;
+        if (done) done();
+      }
+    }, FLIP_MS);
+  }
+
+  function cycle() {
+    var w = next();
+    var L = w.split('');
+    var col = CORE_SET[w] ? TEAL : WHITE;
+    if (chars.length !== L.length) build(L.length);
+    var landed = 0;
+    for (var i = 0; i < L.length; i++) {
+      (function (idx) {
+        setTimeout(function () {
+          flip(chars[idx], L[idx], col, function () {
+            landed++;
+            if (landed === L.length) setTimeout(cycle, HOLD);
+          });
+        }, STAGGER * idx);
+      })(i);
+    }
+  }
+
+  var first = 'ROUTE';
+  lastWord = first;
+  build(first.length);
+  first.split('').forEach(function (ch, i) {
+    chars[i].inner.textContent = ch;
+    chars[i].inner.style.color = TEAL;
+  });
+  setTimeout(cycle, HOLD);
+
+  /* ── CA ── */
+
+  var CA = 'CA_GOES_HERE';
+  var caD = document.getElementById('caDisplay');
+  var caBar = document.getElementById('caBar');
+  var caC = document.getElementById('caCopy');
+
+  function trunc(a) {
+    if (window.innerWidth < 480 && a.length > 14) return a.slice(0, 6) + '…' + a.slice(-5);
+    if (a.length > 20) return a.slice(0, 10) + '…' + a.slice(-8);
+    return a;
+  }
+
+  function renderCA() { caD.textContent = trunc(CA); caD.title = CA; }
+  renderCA();
+  window.addEventListener('resize', renderCA);
+
+  function copyCA() {
+    var ok = function () {
+      caC.textContent = 'copied';
+      setTimeout(function () { caC.textContent = 'copy'; }, 1200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(CA).then(ok);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = CA; ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok();
+    }
+  }
+
+  caBar.addEventListener('click', copyCA);
+  caBar.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyCA(); }
+  });
+
+  /* ── VIEW SWITCHING ── */
+
+  var viewHome = document.getElementById('viewHome');
+  var viewIndex = document.getElementById('viewIndex');
+  var navIdx = document.getElementById('navIdx');
+  var navHome = document.getElementById('navHome');
+
+  function showView(name) {
+    if (name === 'index') {
+      viewHome.classList.remove('active');
+      viewIndex.classList.add('active');
+      navIdx.textContent = 'BACK';
+      window.scrollTo(0, 0);
+      startSlots();
+    } else {
+      viewIndex.classList.remove('active');
+      viewHome.classList.add('active');
+      navIdx.textContent = 'INDEX';
+      window.scrollTo(0, 0);
+      stopSlots();
+    }
+  }
+
+  navIdx.addEventListener('click', function () {
+    if (viewIndex.classList.contains('active')) {
+      showView('home');
+    } else {
+      showView('index');
+    }
+  });
+
+  navHome.addEventListener('click', function () {
+    showView('home');
+  });
+
+  /* ── LABEL SLOT MACHINE ── */
+
+  var labelEls = [];
+  var labelTimers = [];
+  var labelsActive = false;
+
+  function gatherLabels() {
+    if (labelEls.length) return;
+    var els = document.querySelectorAll('.idx-flip[data-flip]');
+    for (var i = 0; i < els.length; i++) labelEls.push(els[i]);
+  }
+
+  function slotLabel(el) {
+    var target = el.getAttribute('data-flip');
+    var tgt = target.split('');
+    var spinning = tgt.length;
+    var stopped = [];
+    for (var i = 0; i < tgt.length; i++) stopped.push(false);
+
+    el.classList.remove('landed');
+    el.classList.add('flipping');
+
+    var spinTimer = setInterval(function () {
+      var s = '';
+      for (var k = 0; k < tgt.length; k++) {
+        if (stopped[k]) {
+          s += tgt[k];
+        } else {
+          s += AZ[Math.floor(Math.random() * 26)].toLowerCase();
+        }
+      }
+      el.textContent = s;
+    }, 55);
+
+    for (var i = 0; i < tgt.length; i++) {
+      (function (idx) {
+        setTimeout(function () {
+          stopped[idx] = true;
+          spinning--;
+          if (spinning === 0) {
+            clearInterval(spinTimer);
+            el.textContent = target;
+            el.classList.remove('flipping');
+            el.classList.add('landed');
+          }
+        }, 400 + idx * 140);
+      })(i);
+    }
+  }
+
+  function entranceLabels() {
+    for (var i = 0; i < labelEls.length; i++) {
+      (function (idx) {
+        setTimeout(function () {
+          slotLabel(labelEls[idx]);
+        }, idx * 400);
+      })(i);
+    }
+    var wait = labelEls.length * 400 + 2500;
+    labelTimers.push(setTimeout(tickLabels, wait));
+  }
+
+  function tickLabels() {
+    if (!labelsActive) return;
+    var idx = Math.floor(Math.random() * labelEls.length);
+    var el = labelEls[idx];
+    if (!el.classList.contains('flipping')) {
+      slotLabel(el);
+    }
+    var next = 2500 + Math.floor(Math.random() * 3500);
+    labelTimers.push(setTimeout(tickLabels, next));
+  }
+
+  function startSlots() {
+    if (labelsActive) return;
+    labelsActive = true;
+    gatherLabels();
+    entranceLabels();
+  }
+
+  function stopSlots() {
+    labelsActive = false;
+    for (var i = 0; i < labelTimers.length; i++) clearTimeout(labelTimers[i]);
+    labelTimers = [];
+  }
+
+})();
+</script>
+
+</body>
+</html>

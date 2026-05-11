@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Start-Process \"C:\\\\Users\\\\forre\\\\Projects\\\\yourtme\\\\site\\\\index.html\")"
+    ]
+  }
+}
